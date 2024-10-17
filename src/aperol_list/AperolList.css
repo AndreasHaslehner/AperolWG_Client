@@ -1,0 +1,4 @@
+.aperol-progress-bar {
+  background-image: linear-gradient(to right, #FFC300, #FF5733); /* Lighter to darker Aperol gradient */
+  color: #fff;
+}
