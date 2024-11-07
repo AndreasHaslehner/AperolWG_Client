@@ -1,12 +1,16 @@
 import Container from 'react-bootstrap/Container';
 import Nav from 'react-bootstrap/Nav';
 import Navbar from 'react-bootstrap/Navbar';
+import { signal } from "@preact/signals-react";
 
 import { client_info, client_online, loginmodal_show } from '../LoginModal';
-import { Alert, Button, Form } from 'react-bootstrap';
+import { Alert, Button, Form, Toast, ToastContainer } from 'react-bootstrap';
 import { api_error_msg, api_get } from '../helper/api_handler';
 import { show_app } from '../App';
 import { amount_arr } from '../aperol_list/AperolList';
+import { token_signal } from '../helper/cookie_handler';
+
+const showToast = signal(false);
 
 function set_log_scale(active){
   const max = Math.max(...amount_arr.peek().map(el => el.sum))
@@ -22,6 +26,18 @@ function set_log_scale(active){
     );
   }
 }
+
+function copyTokenToClipboard(){
+  navigator.clipboard.writeText(token_signal.peek())
+    .then(() => {
+      // Show toast on success
+      showToast.value = true;
+      setTimeout(() => showToast.value = false, 3000); // Automatically hide toast after 3 seconds
+    })
+    .catch(err => {
+      console.error("Failed to copy text: ", err);
+    });
+};
 
 function NavBar() {
 
@@ -46,6 +62,7 @@ function NavBar() {
               label="Logarithmic Scale (natural)"
               onChange={(e) => set_log_scale(e.target.checked)}
             />
+            <Button size="sm" onClick={copyTokenToClipboard}>CopyToken</Button>
             <Nav.Link disabled
               onClick={() => show_app.value = 99}
             >Nothing</Nav.Link>
@@ -53,6 +70,16 @@ function NavBar() {
           </Nav>
         </Navbar.Collapse>
       </Container>
+      <ToastContainer position="top-center" className="p-3">
+        <Toast 
+          show={showToast.value} 
+          onClose={() => showToast.value = false}>
+          <Toast.Header>
+            <strong className="me-auto">Notification</strong>
+          </Toast.Header>
+          <Toast.Body>Token copied to clipboard!</Toast.Body>
+        </Toast>
+      </ToastContainer>
     </Navbar>
   );
 }
